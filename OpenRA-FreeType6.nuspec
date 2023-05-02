@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>OpenRA-Freetype6</id>
+    <version>0.0.1</version> <!-- Version is set during packaging. -->
+    <authors>OpenRA</authors>
+    <owners>OpenRA</owners>
+    <projectUrl>https://github.com/OpenRA/FreeType</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+    This is a version of FreeType patched and packaged for OpenRA.
+    The package includes the native binaries for FreeType 2.12.1.
+    </description>
+    <!-- TODO: Resolve copyright and license. -->
+    <copyright>
+    ???
+    </copyright>
+    <license type="expression">Zlib</license>
+    <tags>OpenRA</tags>
+    <releaseNotes>
+    </releaseNotes>
+  </metadata>
+  <files>
+    <file src="OpenRA-Freetype6.targets" target="build" />
+    <file src="native/win/x86/freetype6.dll" target="native/win-x86" />
+    <file src="native/win/x64/freetype6.dll" target="native/win-x64" />
+    <file src="native/linux/x64/freetype6.so" target="native/linux-x64" />
+    <file src="native/linux/arm64/freetype6.so" target="native/linux-arm64" />
+    <file src="native/osx/x86_64/freetype6.dylib" target="native/osx-x64" />
+    <file src="native/osx/arm64/freetype6.dylib" target="native/osx-arm64" />
+  </files>
+</package>
