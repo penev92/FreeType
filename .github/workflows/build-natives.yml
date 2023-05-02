@@ -1,0 +1,141 @@
+name: Build native dependencies (FreeType)
+
+# Change target FreeType version based on https://github.com/freetype/freetype/tags.
+env:
+  FREETYPE_VERSION: VER-2-13-0 # Make sure this matches the version mentioned in the description in the .nuspec file.
+
+on:
+    workflow_call:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    windows:
+        name: Windows (x86 + x64)
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Clone repository
+              uses: actions/checkout@v3
+
+            - name: Setup Dependencies
+              run: |
+                mkdir -p artifacts/x86
+                mkdir artifacts/x64
+                sudo apt-get install mingw-w64
+
+            - name: Compile natives
+              run: |
+                curl -s -L -O https://github.com/freetype/freetype/archive/refs/tags/${FREETYPE_VERSION}.zip
+                unzip ${FREETYPE_VERSION}.zip
+                mkdir freetype-${FREETYPE_VERSION}/build
+                cp win64.patch freetype-${FREETYPE_VERSION}/win64.patch
+                cd freetype-${FREETYPE_VERSION}
+                patch -p0 < win64.patch
+                cd build
+                cmake .. -DCMAKE_TOOLCHAIN_FILE=../../mingw-x86.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_BUILD_TYPE=Release -DFT_DISABLE_ZLIB=TRUE -DFT_DISABLE_BZIP2=TRUE -DFT_DISABLE_PNG=TRUE -DFT_DISABLE_HARFBUZZ=TRUE -DFT_DISABLE_BROTLI=TRUE -DCMAKE_SHARED_LINKER_FLAGS="-static-libgcc"
+                cmake --build .
+                cp libfreetype.dll ../../artifacts/x86/freetype6.dll
+                rm -rf *
+                cmake .. -DCMAKE_TOOLCHAIN_FILE=../../mingw-x64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_BUILD_TYPE=Release -DFT_DISABLE_ZLIB=TRUE -DFT_DISABLE_BZIP2=TRUE -DFT_DISABLE_PNG=TRUE -DFT_DISABLE_HARFBUZZ=TRUE -DFT_DISABLE_BROTLI=TRUE
+                cmake --build .
+                cp libfreetype.dll ../../artifacts/x64/freetype6.dll
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                name: Natives-Windows
+                path: ./artifacts
+
+    macos:
+        name: macOS (x64 + arm64)
+        runs-on: macos-11
+        steps:
+            - name: Setup Dependencies
+              run: |
+                mkdir -p artifacts/x86_64
+                mkdir artifacts/arm64
+
+            - name: Compile natives
+              run: |
+                curl -s -L -O https://github.com/freetype/freetype/archive/refs/tags/${FREETYPE_VERSION}.zip
+                unzip ${FREETYPE_VERSION}.zip
+                cd freetype-${FREETYPE_VERSION}
+                cmake -B build -DBUILD_SHARED_LIBS=true -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.11 -DFT_DISABLE_ZLIB=TRUE -DFT_DISABLE_BZIP2=TRUE -DFT_DISABLE_PNG=TRUE -DFT_DISABLE_HARFBUZZ=TRUE -DFT_DISABLE_BROTLI=TRUE
+                cmake --build build
+                lipo -thin x86_64 build/libfreetype.6.dylib -output ../artifacts/x86_64/freetype6.dylib
+                lipo -thin arm64 build/libfreetype.6.dylib -output ../artifacts/arm64/freetype6.dylib
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                name: Natives-MacOS
+                path: ./artifacts
+
+    # Note: Running inside a CentOS container because we want to compile using a version of glibc
+    # that is as old as reasonably possible to ensure backwards compatibility of the compiled binaries.
+    linux-x64:
+        name: Linux (x64)
+        runs-on: ubuntu-22.04
+        container: centos:centos7
+        steps:
+            - name: Setup Dependencies
+              run: |
+                mkdir -p artifacts/x64
+                chown -R $(id -u):$(id -g) $PWD
+                yum -y install https://repo.ius.io/ius-release-el7.rpm centos-release-scl scl-utils
+                yum -y install devtoolset-8 cmake3
+                source /opt/rh/devtoolset-8/enable
+
+            - name: Compile natives
+              run: |
+                curl -s -L -O https://github.com/freetype/freetype/archive/refs/tags/${FREETYPE_VERSION}.zip
+                unzip ${FREETYPE_VERSION}.zip
+                mkdir freetype-${FREETYPE_VERSION}/build
+                cd freetype-${FREETYPE_VERSION}/build
+                cmake3 .. -DBUILD_SHARED_LIBS=true -DCMAKE_BUILD_TYPE=Release -DFT_DISABLE_ZLIB=TRUE -DFT_DISABLE_BZIP2=TRUE -DFT_DISABLE_PNG=TRUE -DFT_DISABLE_HARFBUZZ=TRUE -DFT_DISABLE_BROTLI=TRUE
+                cmake3 --build .
+                cp libfreetype.so ../../artifacts/x64/freetype6.so
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                name: Natives-Linux(x64)
+                path: ./artifacts
+
+    # Note: Using the run-on-arch action is *very* slow, but is the only way to simulate arm64 architecture.
+    linux-arm64:
+        name: Linux (arm64)
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Setup dependencies and compile natives
+              uses: uraimo/run-on-arch-action@v2
+              with:
+                arch: aarch64
+                distro: ubuntu22.04
+                shell: /bin/sh
+                githubToken: ${{ github.token }}
+                setup: |
+                  mkdir -p "${PWD}/artifacts/arm64"
+                dockerRunArgs: |
+                  --volume "${PWD}/artifacts:/artifacts"
+                env: |
+                  FREETYPE_VERSION: ${{ env.FREETYPE_VERSION }}
+                install: |
+                  apt-get update -q -y
+                  apt-get install -y build-essential curl cmake unzip
+                run: |
+                  curl -s -L -O https://github.com/freetype/freetype/archive/refs/tags/${FREETYPE_VERSION}.zip
+                  unzip ${FREETYPE_VERSION}.zip
+                  mkdir freetype-${FREETYPE_VERSION}/build
+                  cd freetype-${FREETYPE_VERSION}/build
+                  cmake .. -DBUILD_SHARED_LIBS=true -DCMAKE_BUILD_TYPE=Release -DFT_DISABLE_ZLIB=TRUE -DFT_DISABLE_BZIP2=TRUE -DFT_DISABLE_PNG=TRUE -DFT_DISABLE_HARFBUZZ=TRUE -DFT_DISABLE_BROTLI=TRUE
+                  cmake --build .
+                  cp libfreetype.so /artifacts/arm64/freetype6.so
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                name: Natives-Linux(arm64)
+                path: ./artifacts
