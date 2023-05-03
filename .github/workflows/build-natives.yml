@@ -31,11 +31,10 @@ jobs:
                 ls -l
                 unzip ${FREETYPE_VERSION}.zip
                 ls -l
-                cd freetype-${FREETYPE_VERSION}
-                mkdir build
+                mkdir freetype-${FREETYPE_VERSION}/build
                 echo "AAAAAAAAAAAAAAAAAAAAAA"
                 ls -l
-                cp win64.patch  freetype-${FREETYPE_VERSION}/win64.patch
+                cp win64.patch freetype-${FREETYPE_VERSION}/win64.patch
                 cd freetype-${FREETYPE_VERSION}
                 patch -p0 < win64.patch
                 cd build
