@@ -29,10 +29,10 @@ jobs:
               run: |
                 curl -s -L -O https://github.com/freetype/freetype/archive/refs/tags/${FREETYPE_VERSION}.zip
                 ls -l
-                unzip freetype-${FREETYPE_VERSION}.zip
+                unzip ${FREETYPE_VERSION}.zip
                 ls -l
-                cd freetype-${FREETYPE_VERSION}
-                mkdir freetype-${FREETYPE_VERSION}/build
+                cd ${FREETYPE_VERSION}
+                mkdir build
                 cp win64.patch  freetype-${FREETYPE_VERSION}/win64.patch
                 cd freetype-${FREETYPE_VERSION}
                 patch -p0 < win64.patch
