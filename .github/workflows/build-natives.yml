@@ -27,6 +27,7 @@ jobs:
             - name: Compile natives
               run: |
                 curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                ls -l
                 tar xf freetype-${FREETYPE_VERSION}.tar.xz
                 mkdir freetype-${FREETYPE_VERSION}/build
                 cp win64.patch  freetype-${FREETYPE_VERSION}/win64.patch
@@ -59,6 +60,7 @@ jobs:
             - name: Compile natives
               run: |
                 curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                ls -l
                 tar xf freetype-${FREETYPE_VERSION}.tar.xz
                 cd freetype-${FREETYPE_VERSION}
                 cmake -B build -DBUILD_SHARED_LIBS=true -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.11 -DFT_DISABLE_ZLIB=TRUE -DFT_DISABLE_BZIP2=TRUE -DFT_DISABLE_PNG=TRUE -DFT_DISABLE_HARFBUZZ=TRUE -DFT_DISABLE_BROTLI=TRUE
@@ -90,6 +92,7 @@ jobs:
             - name: Compile natives
               run: |
                 curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                ls -l
                 tar xf freetype-${FREETYPE_VERSION}.tar.xz
                 mkdir freetype-${FREETYPE_VERSION}/build
                 cd freetype-${FREETYPE_VERSION}/build
@@ -126,6 +129,7 @@ jobs:
                   apt-get install -y build-essential curl cmake
                 run: |
                   curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                  ls -l
                   tar xf freetype-${FREETYPE_VERSION}.tar.xz
                   mkdir freetype-${FREETYPE_VERSION}/build
                   cd freetype-${FREETYPE_VERSION}/build
