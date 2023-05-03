@@ -27,6 +27,7 @@ jobs:
             - name: Compile natives
               run: |
                 curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                cat freetype-2.13.0.tar.xz
                 ls -l
                 tar xf freetype-${FREETYPE_VERSION}.tar.xz
                 mkdir freetype-${FREETYPE_VERSION}/build
@@ -60,6 +61,7 @@ jobs:
             - name: Compile natives
               run: |
                 curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                cat freetype-2.13.0.tar.xz
                 ls -l
                 tar xf freetype-${FREETYPE_VERSION}.tar.xz
                 cd freetype-${FREETYPE_VERSION}
@@ -92,6 +94,7 @@ jobs:
             - name: Compile natives
               run: |
                 curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                cat freetype-2.13.0.tar.xz
                 ls -l
                 tar xf freetype-${FREETYPE_VERSION}.tar.xz
                 mkdir freetype-${FREETYPE_VERSION}/build
@@ -129,6 +132,7 @@ jobs:
                   apt-get install -y build-essential curl cmake
                 run: |
                   curl -s -L -O https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz
+                  cat freetype-2.13.0.tar.xz
                   ls -l
                   tar xf freetype-${FREETYPE_VERSION}.tar.xz
                   mkdir freetype-${FREETYPE_VERSION}/build
